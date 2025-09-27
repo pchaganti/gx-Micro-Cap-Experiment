@@ -181,7 +181,7 @@ Risk And Liquidity Checks
 
 "
 
-## All prompts for changing chats going forward (changed on 8/30):
+## All first prompts after changing chats going forward (changed on 8/30):
 "
 
 SYSTEM MESSAGE (paste as the system/assistant role)
