@@ -564,8 +564,15 @@ Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, or press 
             if action == "s":
                 try:
                     ticker = input("Enter ticker symbol: ").strip().upper()
-                    shares = float(input("Enter number of shares to sell (LIMIT): "))
-                    sell_price = float(input("Enter sell LIMIT price: "))
+                    sell_order_type = input("Order type? 'm' = market-on-open, 'l' = limit: ").strip().lower()
+                    shares = float(input("Enter number of shares to sell: "))
+                    if sell_order_type == 'l':
+                        sell_price = float(input("Enter sell LIMIT price: "))
+                    elif sell_order_type == 'm':
+                        sell_price = o
+                    else:
+                        print("Unknown order type. Use 'm' or 'l'.")
+                        continue
                     if shares <= 0 or sell_price <= 0:
                         raise ValueError
                 except ValueError:
