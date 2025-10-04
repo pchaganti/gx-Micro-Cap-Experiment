@@ -1,85 +1,132 @@
 # Start Your Own
 
-This folder lets you run the trading experiment on your own computer. It contains two small scripts and the CSV files they produce.
+This folder lets you run the ChatGPT Micro-Cap Trading Experiment locally on your own computer.  
+It contains the main trading script, a wrapper for convenience, and utilities to generate performance graphs.  
+All output is saved to CSV files inside this folder.
 
-Run the commands below from the repository root. The scripts automatically
-save their CSV data inside this folder.
+---
 
-## Overview
+## Setup
 
- **Install dependencies:**
-   ```bash
-   # Recommended: Use a virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   pip install -r requirements.txt
-   ```
+**Install dependencies:**
+```bash
+# Recommended: Use a virtual environment
+python -m venv venv
+source venv/bin/activate      # On Windows: venv\Scripts\activate
 
-**Processing Portfolio:**
-   ```bash
-   # ALWAYS include a CSV file of history
+pip install -r requirements.txt
+```
 
-   python trading_script.py --data-dir "Start Your Own"
-   ```
+---
 
-**To Save Prior Days:**
-   ```bash
+## Trading Script
 
-   # Save data with specific date
-   python trading_script.py --asof 2025-08-27 --data-dir "Start Your Own"
-   ```
+The main script is `trading_script.py`. It updates the portfolio, logs trades, and prints daily results.
 
-**Generate performance graphs:**
-   ```bash
-   python "Start Your Own/Generate_Graph.py"
-   ```
+**Run the trading script:**
+```bash
+python trading_script.py --data-dir "Start Your Own"
+```
 
-### Argument Table for 'Generate_Graph.py'
+### Argument Table for `trading_script.py`
 
-| Argument            | Type   | Default          | Description                                                        |
-|---------------------|--------|------------|--------------------------------------------------------------------------|
-| `--start-date`      | str    | Start date in CSV| Start date in `YYYY-MM-DD` format                                  |
-| `--end-date`        | str    | End date in CSV| End date in `YYYY-MM-DD` format                                      |
-| `--start-equity`    | float  | 100.0   | Baseline to index both series (default 100)                                 |
-| `--output`          | str    | —       | Optional path to save the chart (`.png` / `.jpg` / `.pdf`)                  |
+| Argument            | Short | Type   | Default | Choices                               | Description                                   |
+|---------------------|-------|--------|---------|---------------------------------------|-----------------------------------------------|
+| `--data-dir`        |       | str    | None    |                                       | **Required.** Folder where CSV data is stored |
+| `--asof`            |       | str    | None    |                                       | Treat this `YYYY-MM-DD` as "today"            |
+| `--log-level`       |       | str    | None    | DEBUG, INFO, WARNING, ERROR, CRITICAL | Set the logging level (default: none)         |
+| `--starting-equity` | `-s`  | float  | None    |                                       | Starting cash amount (e.g., `10000`)          |
 
-## ProcessPortfolio.py
+### Examples
+```bash
+# Run with a specific data directory
+python trading_script.py --data-dir "Start Your Own"
 
-### IMPORTANT
+# Run as if today were 2025-10-01
+python trading_script.py --data-dir "Start Your Own" --asof 2025-10-01
 
-Always run the program after the market closes at 4:00 PM EST, otherwise it will default to using the previous day’s data.
+# Enable detailed logging
+python trading_script.py --data-dir "Start Your Own" --log-level DEBUG
 
-Because the program relies on past data, orders for a given day are generated after that day’s trading session and must be placed on the following trading day. This prevents lookahead bias. For example, When I receive orders from ChatGPT, I run the program and input the orders the close the day after.  
+# Start with $10,000 in cash
+python trading_script.py --data-dir "Start Your Own" --starting-equity 10000
 
-This script updates your portfolio and logs trades.
+# Combine multiple options
+python trading_script.py --data-dir "Start Your Own" --asof 2025-10-01 --log-level INFO -s 5000
+```
 
-**Information**
-   - The program uses past data from 'chatgpt_portfolio_update.csv' to automatically grab today's portfolio.
-   - If 'chatgpt_portfolio_update.csv' is empty (meaning no past trading days logged), you will required to enter your starting cash.
-   - From here, you can set up your portfolio or make any changes.
-   - The script asks if you want to record manual buys or sells.
-   - After you hit 'Enter' all calculations for the day are made.
-   - Results are saved to `chatgpt_portfolio_update.csv` and any trades are added to `chatgpt_trade_log.csv`.
-   - In the terminal, daily results are printed. Copy and paste results into the LLM.
-To automate prompts, check out the [Automation Guide](https://github.com/LuckyOne7777/ChatGPT-Micro-Cap-Experiment/blob/main/Other/AUTOMATION_README.md)
-## Generate_Graph.py
+---
 
-This script draws a graph of your portfolio versus the S&P 500.
+## ProcessPortfolio Wrapper
 
-**Program will ALWAYS use 'Start Your Own/chatgpt_portfolio_update.csv' for data.**
+`Start Your Own/ProcessPortfolio.py` is a thin wrapper around `trading_script.py`.  
+It automatically uses `"Start Your Own"` as the data directory, so you don’t have to pass `--data-dir` manually.
 
-1. **Ensure you have portfolio data**
-   - Run `ProcessPortfolio.py` at least once so `chatgpt_portfolio_update.csv` has data.
+**Run with default settings:**
+```bash
+python "Start Your Own/ProcessPortfolio.py"
+```
 
-2. **Run the graph script**
-   ```bash
-   python "Start Your Own/Generate_Graph.py" --start-equity 100
-   ```
-   
-3. **View the chart**
-   - A window opens showing your portfolio value vs. S&P 500. Results will be adjusted for baseline equity.
+---
 
-All of this is still VERY NEW, so there are bugs. Please reach out if you find an issue or have a question.
+## Generate Performance Graphs
 
-Both scripts are designed for beginners, feel free to experiment and modify them as you learn.
+The `Generate_Graph.py` script plots portfolio performance using `chatgpt_portfolio_update.csv`.
+
+**Run the graph generator:**
+```bash
+python "Start Your Own/Generate_Graph.py"
+```
+
+### Argument Table for `Generate_Graph.py`
+
+| Argument       | Short | Type  | Default          | Choices | Description                                      |
+|----------------|-------|-------|------------------|---------|--------------------------------------------------|
+| `--start-date` |       | str   | Start date in CSV|         | Start date in `YYYY-MM-DD` format                |
+| `--end-date`   |       | str   | End date in CSV  |         | End date in `YYYY-MM-DD` format                  |
+| `--start-equity` |     | float | 100.0            |         | Baseline equity for indexing both series         |
+| `--output`     |       | str   | None             |         | Save chart to file (`.png`, `.jpg`, or `.pdf`)   |
+
+### Examples
+```bash
+# Generate graph for the entire CSV date range
+python "Start Your Own/Generate_Graph.py"
+
+# Generate graph for a specific period
+python "Start Your Own/Generate_Graph.py" --start-date 2025-01-01 --end-date 2025-10-01
+
+# Use a custom starting equity
+python "Start Your Own/Generate_Graph.py" --start-equity 10000
+
+# Save graph to a PNG file
+python "Start Your Own/Generate_Graph.py" --output results.png
+
+# Combine options
+python "Start Your Own/Generate_Graph.py" --start-date 2025-01-01 --end-date 2025-10-01 --start-equity 5000 --output performance.pdf
+```
+
+---
+
+## Important Notes
+
+- **Run after market close (4:00 PM EST).**  
+  Otherwise, the program will default to the previous trading day’s data.
+
+- **Trades are generated after the market day ends.**  
+  This prevents lookahead bias. For example, if trades are suggested on Monday, you should enter them on Tuesday’s market open.
+
+- **How it works:**  
+  - The program reads from `chatgpt_portfolio_update.csv` to get the latest portfolio state.  
+  - If the file is empty, you will be prompted to enter your starting cash.  
+  - The script allows recording manual buys and sells interactively.  
+  - Results are saved to:  
+    - `chatgpt_portfolio_update.csv` (portfolio snapshots)  
+    - `chatgpt_trade_log.csv` (trade history)  
+  - Daily results are printed in the terminal — copy these into ChatGPT for trading decisions.  
+
+For automation, see the [Automation Guide](https://github.com/LuckyOne7777/ChatGPT-Micro-Cap-Experiment/blob/main/Other/AUTOMATION_README.md).
+
+---
+
+Both scripts are designed to be beginner-friendly. Feel free to experiment and modify them as you learn.  
+This project is still evolving — please report bugs or questions!
