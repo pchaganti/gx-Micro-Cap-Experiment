@@ -1,6 +1,6 @@
 # Start Your Own
 
-This folder lets you run the ChatGPT Micro-Cap Trading Experiment locally on your own computer.  
+This folder lets you create your own LLM trading experiment.  
 It contains the main trading script, a wrapper for convenience, and utilities to generate performance graphs.  
 All output is saved to CSV files inside this folder.
 
