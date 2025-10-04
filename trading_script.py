@@ -722,7 +722,7 @@ Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, or press 
 
 
     logger.info("Writing CSV file: %s", PORTFOLIO_CSV)
-    df_out.to_csv(PORTFOLIO_CSV, index=False)
+    combined.to_csv(PORTFOLIO_CSV, index=False)
     logger.info("Successfully wrote CSV file: %s", PORTFOLIO_CSV)
 
     return portfolio_df, cash
