@@ -17,7 +17,7 @@ Notes:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, cast,Dict, List, Optional
 import os
@@ -25,7 +25,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
+import yfinance as yf # type: ignore
 import json
 import logging
 
@@ -303,6 +303,7 @@ def _yahoo_download(ticker: str, **kwargs: Any) -> pd.DataFrame:
         try:
             with redirect_stdout(buf), redirect_stderr(buf):
                 df = cast(pd.DataFrame, yf.download(ticker, **kwargs))
+                
         except Exception:
             return pd.DataFrame()
     return df if isinstance(df, pd.DataFrame) else pd.DataFrame()
@@ -416,17 +417,26 @@ def download_price_data(ticker: str, **kwargs: Any) -> FetchResult:
     # ---------- 1) Yahoo (date-bounded) ----------
     df_y = _yahoo_download(ticker, start=s, end=e, **kwargs)
     if isinstance(df_y, pd.DataFrame) and not df_y.empty:
+        logger.info(f"Successfully retrieved {ticker} data from YahooFinance")
         return FetchResult(_normalize_ohlcv(_to_datetime_index(df_y)), "yahoo")
+    else:
+        logger.warning(f"Yahoo download failed for {ticker}. Trying Stooq...")
 
     # ---------- 2) Stooq via pandas-datareader ----------
     df_s = _stooq_download(ticker, start=s, end=e)
     if isinstance(df_s, pd.DataFrame) and not df_s.empty:
+        logger.info(f"Successfully retrieved {ticker} data from Stooq")
         return FetchResult(_normalize_ohlcv(_to_datetime_index(df_s)), "stooq-pdr")
+    else:
+        logger.warning(f"Stooq download failed for {ticker}. Trying direct CSV download...")
 
     # ---------- 3) Stooq direct CSV ----------
     df_csv = _stooq_csv_download(ticker, s, e)
     if isinstance(df_csv, pd.DataFrame) and not df_csv.empty:
+        logger.info(f"Successfully retrieved {ticker} data from CSV")
         return FetchResult(_normalize_ohlcv(_to_datetime_index(df_csv)), "stooq-csv")
+    else:
+        logger.warning(f"All sources failed to get {ticker}'s data")
 
     # ---------- 4) Proxy indices if applicable ----------
     proxy_map = {"^GSPC": "SPY", "^RUT": "IWM"}
@@ -435,6 +445,7 @@ def download_price_data(ticker: str, **kwargs: Any) -> FetchResult:
         df_proxy = _yahoo_download(proxy, start=s, end=e, **kwargs)
         if isinstance(df_proxy, pd.DataFrame) and not df_proxy.empty:
             return FetchResult(_normalize_ohlcv(_to_datetime_index(df_proxy)), f"yahoo:{proxy}-proxy")
+    
 
     # ---------- Nothing worked ----------
     empty = pd.DataFrame(columns=["Open", "High", "Low", "Close", "Adj Close", "Volume"])
@@ -1319,30 +1330,32 @@ def main(data_dir: Path | None = None, starting_equity_override: Optional[Union[
     chatgpt_portfolio, cash = process_portfolio(chatgpt_portfolio, cash)
     daily_results(chatgpt_portfolio, cash)
 
-
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", default=None, help="Optional data directory")
-    parser.add_argument("--asof", default=None, help="Treat this YYYY-MM-DD as 'today' (e.g., 2025-08-27)")
-    parser.add_argument("--log-level", default="INFO", 
-                       choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                       help="Set the logging level (default: INFO)")
+    parser.add_argument("--asof", default=None, help="Treat this YYYY-MM-DD as 'today'")
+    parser.add_argument(
+        "--log-level",
+        default=None,   # default = None means no logging unless specified
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Set the logging level (default: none)"
+    )
     parser.add_argument("--starting-equity", "-s", default=None,
-                       help="Optional starting equity (e.g. 10000 or $10,000.50). If not provided, script will prompt when needed.")
+                       help="Optional starting equity")
     args = parser.parse_args()
 
-    
-    # Configure logging level
-    logging.basicConfig(
-        level=getattr(logging, args.log_level.upper()),
-        format=' %(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s'
-    )
-
-    # Log initial global state and command-line arguments
-    _log_initial_state()
-    logger.info("Script started with arguments: %s", vars(args))
+    # Configure logging only if requested
+    if args.log_level:
+        logging.basicConfig(
+            level=getattr(logging, args.log_level.upper()),
+            format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s",
+            force=True  # ensure our config overrides any defaults
+        )
+        logging.getLogger("peewee").setLevel(logging.WARNING)
+        _log_initial_state()
+        logger.info("Script started with arguments: %s", vars(args))
 
     if args.asof:
         set_asof(args.asof)
