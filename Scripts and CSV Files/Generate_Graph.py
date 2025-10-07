@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-import yfinance as yf
-from pathlib import Path  # NEW
+import yfinance as yf # type: ignore
+from pathlib import Path
 
 DATA_DIR = "Scripts and CSV Files"
 PORTFOLIO_CSV = f"{DATA_DIR}/chatgpt_portfolio_update.csv"
 
 # Save path in project root
-RESULTS_PATH = Path("Results.png")  # NEW
+RESULTS_PATH = Path("Results.png")
 
 
 def load_portfolio_totals() -> pd.DataFrame:
