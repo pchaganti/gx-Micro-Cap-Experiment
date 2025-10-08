@@ -614,6 +614,9 @@ Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, or press 
             if action == "s":
                 try:
                     ticker = input("Enter ticker symbol: ").strip().upper()
+                    if ticker not in portfolio_df["ticker"]:
+                        print(f"Manual sell for {ticker} failed: ticker not in portfolio.")
+                        continue
                     sell_order_type = input("Order type? 'm' = market-on-open, 'l' = limit: ").strip().lower()
                     shares = float(input("Enter number of shares to sell: "))
                     if sell_order_type == 'l':
@@ -903,17 +906,13 @@ def log_manual_sell(
     if interactive:
         reason = input(
             f"""You are placing a SELL LIMIT for {shares_sold} {ticker} at ${sell_price:.2f}.
-If this is a mistake, enter 1, or hit Enter."""
+If this is a mistake, enter 1, or hit Enter to confirm."""
         )
     if reason == "1":
         print("Returning...")
         return cash, chatgpt_portfolio
     elif reason is None:
         reason = ""
-
-    if ticker not in chatgpt_portfolio["ticker"].values:
-        print(f"Manual sell for {ticker} failed: ticker not in portfolio.")
-        return cash, chatgpt_portfolio
 
     ticker_row = chatgpt_portfolio[chatgpt_portfolio["ticker"] == ticker]
     total_shares = int(ticker_row["shares"].item())
@@ -1351,9 +1350,9 @@ if __name__ == "__main__":
         logging.basicConfig(
             level=getattr(logging, args.log_level.upper()),
             format="%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s",
-            force=True  # ensure our config overrides any defaults
+            force=True
         )
-        logging.getLogger("peewee").setLevel(logging.WARNING)
+        logging.getLogger("peewee").setLevel(logging.WARNING) # ignore constant info messages from PeeWee
         _log_initial_state()
         logger.info("Script started with arguments: %s", vars(args))
 

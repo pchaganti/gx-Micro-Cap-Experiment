@@ -81,7 +81,7 @@ This project is an attempt to find out — with transparency, data, and a real b
 - **Python** - Core scripting and automation
 - **pandas + yFinance** - Market data fetching and analysis
 - **Matplotlib** - Performance visualization and charting
-- **ChatGPT-4** - AI-powered trading decision engine
+- **ChatGPT-5** - AI-powered trading decision engine
 
 ## Key Features
 - **Robust Data Sources** - Yahoo Finance primary, Stooq fallback for reliability
