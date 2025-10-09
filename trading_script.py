@@ -614,7 +614,7 @@ Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, or press 
             if action == "s":
                 try:
                     ticker = input("Enter ticker symbol: ").strip().upper()
-                    if ticker not in portfolio_df["ticker"]:
+                    if ticker not in portfolio_df["ticker"].values:
                         print(f"Manual sell for {ticker} failed: ticker not in portfolio.")
                         continue
                     sell_order_type = input("Order type? 'm' = market-on-open, 'l' = limit: ").strip().lower()
@@ -913,7 +913,6 @@ If this is a mistake, enter 1, or hit Enter to confirm."""
         return cash, chatgpt_portfolio
     elif reason is None:
         reason = ""
-
     ticker_row = chatgpt_portfolio[chatgpt_portfolio["ticker"] == ticker]
     total_shares = int(ticker_row["shares"].item())
     if shares_sold > total_shares:
