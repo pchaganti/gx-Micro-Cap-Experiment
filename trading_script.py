@@ -502,9 +502,24 @@ def process_portfolio(
             print(portfolio_df)
             action = input(
                 f""" You have {cash} in cash.
-Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, or press Enter to continue: """
+Would you like to log a manual trade? Enter 'b' for buy, 's' for sell, "u" to update a stoploss, or press Enter to continue: """
             ).strip().lower()
+            if action == "u":
+                ticker = input("Enter ticker symbol: ").strip().upper()
+                if ticker not in portfolio_df["ticker"].values:
+                    print(f"{ticker} not found in portfolio.")
+                    continue
+                else:
+                    try:
+                        new_stoploss = float(input("What is your new stoploss? ").strip())
+                    except Exception as e:
+                        print(f"error when processing stoploss: {e}")
+                        continue
 
+                    portfolio_df.loc[portfolio_df["ticker"] == ticker, "stop_loss"] = new_stoploss
+                    print(f"Stoploss for {ticker} is now updated to {new_stoploss}.")
+                    continue
+                     
             if action == "b":
                 ticker = input("Enter ticker symbol: ").strip().upper()
                 order_type = input("Order type? 'm' = market-on-open, 'l' = limit: ").strip().lower()
