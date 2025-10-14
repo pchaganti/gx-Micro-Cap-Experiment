@@ -69,8 +69,8 @@ def _effective_now() -> datetime:
 # ------------------------------
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR  # Save files alongside this script by default
-PORTFOLIO_CSV = DATA_DIR / "chatgpt_portfolio_update.csv"
-TRADE_LOG_CSV = DATA_DIR / "chatgpt_trade_log.csv"
+PORTFOLIO_CSV = DATA_DIR / "Daily Updates.csv"
+TRADE_LOG_CSV = DATA_DIR / "Trade Log.csv"
 DEFAULT_BENCHMARKS = ["IWO", "XBI", "SPY", "IWM"]
 
 # Set up logger for this module
@@ -463,8 +463,8 @@ def set_data_dir(data_dir: Path) -> None:
     DATA_DIR = Path(data_dir)
     logger.debug("Creating data directory if it doesn't exist: %s", DATA_DIR)
     os.makedirs(DATA_DIR, exist_ok=True)
-    PORTFOLIO_CSV = DATA_DIR / "chatgpt_portfolio_update.csv"
-    TRADE_LOG_CSV = DATA_DIR / "chatgpt_trade_log.csv"
+    PORTFOLIO_CSV = DATA_DIR / "Daily Updates.csv"
+    TRADE_LOG_CSV = DATA_DIR / "Trade Log.csv"
     logger.info("Data directory configured - Portfolio CSV: %s, Trade Log CSV: %s", PORTFOLIO_CSV, TRADE_LOG_CSV)
 
 

@@ -4,7 +4,7 @@ import yfinance as yf # type: ignore
 from pathlib import Path
 
 DATA_DIR = "Scripts and CSV Files"
-PORTFOLIO_CSV = f"{DATA_DIR}/chatgpt_portfolio_update.csv"
+PORTFOLIO_CSV = f"{DATA_DIR}/Daily Updates.csv"
 
 # Save path in project root
 RESULTS_PATH = Path("Results.png")
