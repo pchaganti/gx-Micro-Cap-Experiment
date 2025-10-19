@@ -1312,7 +1312,6 @@ def load_latest_portfolio_state(
             "Total Equity",
             "Action",
             "Current Price",
-            "PnL",
             "Total Value",
         ],
         inplace=True,
