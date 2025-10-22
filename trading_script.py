@@ -1349,7 +1349,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", default=None, help="Optional data directory")
+    parser.add_argument("--data-dir", default=None, help="Required data directory")
     parser.add_argument("--asof", default=None, help="Treat this YYYY-MM-DD as 'today'")
     parser.add_argument(
         "--log-level",
