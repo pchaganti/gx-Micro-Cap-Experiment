@@ -1229,7 +1229,9 @@ def daily_results(chatgpt_portfolio: pd.DataFrame, cash: float) -> None:
     print(f"{'Cash Balance:':32} ${cash:>14,.2f}")
 
     print("\n[ Holdings ]")
-    print(chatgpt_portfolio)
+    new_portfolio_state, cash = load_latest_portfolio_state()
+    new_portfolio_state = pd.DataFrame(new_portfolio_state)
+    print(new_portfolio_state)
     
     # Add volume-based liquidity warnings (research: J.Financial Markets 2019)
     # Micro-caps with <50% avg volume have 3x higher slippage
@@ -1252,10 +1254,10 @@ def daily_results(chatgpt_portfolio: pd.DataFrame, cash: float) -> None:
                 if price_str != '—':
                     dollar_volume = current_vol * float(price_str)
                     if dollar_volume < 50000:
-                        print(f"⚠️  {ticker_str}: SEVERE liquidity - only ${dollar_volume:,.0f} traded today")
+                        print(f"  {ticker_str}: SEVERE liquidity - only ${dollar_volume:,.0f} traded today")
                         warnings_found = True
                     elif dollar_volume < 100000:
-                        print(f"⚠️  {ticker_str}: Low liquidity - ${dollar_volume:,.0f} traded today")
+                        print(f"  {ticker_str}: Low liquidity - ${dollar_volume:,.0f} traded today")
                         warnings_found = True
         except:
             pass
