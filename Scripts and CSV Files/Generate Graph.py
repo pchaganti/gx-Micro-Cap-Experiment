@@ -41,6 +41,24 @@ def download_sp500(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataF
     sp500["SPX Value ($100 Invested)"] = sp500["Close"] * scaling_factor
     return sp500[["Date", "SPX Value ($100 Invested)"]]
 
+def download_baseline(ticker: str, start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
+    """Download prices and normalise to a $100 baseline."""
+
+    baseline = yf.download(ticker, start=start_date, end=end_date + pd.Timedelta(days=1),
+                        progress=False, auto_adjust=True)
+    baseline = baseline.reset_index()
+    if isinstance(baseline.columns, pd.MultiIndex):
+        baseline.columns = baseline.columns.get_level_values(0)
+
+    starting_price_data = yf.download(ticker, start="2025-06-27", end="2025-06-28", auto_adjust=True, progress=False)
+    if isinstance(starting_price_data.columns, pd.MultiIndex):
+        starting_price_data.columns = starting_price_data.columns.droplevel(1)
+    starting_price = starting_price_data.loc[starting_price_data.index[0], "Close"]
+
+    scaling_factor = 100.0 / starting_price
+    baseline["Adjusted Value ($100 Invested)"] = baseline["Close"] * scaling_factor
+    return baseline[["Date", "Adjusted Value ($100 Invested)"]]
+
 
 def find_largest_gain(df: pd.DataFrame) -> tuple[pd.Timestamp, pd.Timestamp, float]:
     """
@@ -107,7 +125,8 @@ def main() -> dict:
 
     start_date = pd.Timestamp("2025-06-27")
     end_date = chatgpt_totals["Date"].max()
-    sp500 = download_sp500(start_date, end_date)
+    sp500 = download_baseline("^SPX", start_date, end_date)
+    russell = download_baseline("^RUT", start_date, end_date)
 
     # metrics
     largest_start, largest_end, largest_gain = find_largest_gain(chatgpt_totals)
@@ -127,10 +146,19 @@ def main() -> dict:
     )
     plt.plot(
         sp500["Date"],
-        sp500["SPX Value ($100 Invested)"],
+        sp500["Adjusted Value ($100 Invested)"],
         label="S&P 500 ($100 Invested)",
         marker="o",
         color="orange",
+        linestyle="--",
+        linewidth=2,
+    )
+    plt.plot(
+        russell["Date"],
+        russell["Adjusted Value ($100 Invested)"],
+        label="Russell 2K ($100 Invested)",
+        marker="o",
+        color="Green",
         linestyle="--",
         linewidth=2,
     )
@@ -150,9 +178,11 @@ def main() -> dict:
     # annotate final P/Ls
     final_date = chatgpt_totals["Date"].iloc[-1]
     final_chatgpt = float(chatgpt_totals["Total Equity"].iloc[-1])
-    final_spx = float(sp500["SPX Value ($100 Invested)"].iloc[-1])
+    final_spx = float(sp500["Adjusted Value ($100 Invested)"].iloc[-1])
+    final_rut = float(russell["Adjusted Value ($100 Invested)"].iloc[-1])
     plt.text(final_date, final_chatgpt + 0.5, f"{final_chatgpt - 100.0:.1f}%", color="blue", fontsize=9)
     plt.text(final_date, final_spx + 0.9, f"+{final_spx - 100.0:.1f}%", color="orange", fontsize=9)
+    plt.text(final_date, final_rut + 0.9, f"+{final_rut - 100.0:.1f}%", color="green", fontsize=9)
 
     # label ATYR's catalyst failure
     plt.text(
@@ -172,7 +202,7 @@ def main() -> dict:
         fontsize=9,
     )
 
-    plt.title("ChatGPT's Micro Cap Portfolio vs. S&P 500")
+    plt.title("ChatGPT's Micro Cap Portfolio vs. S&P 500 vs Russell 2000")
     plt.xlabel("Date")
     plt.ylabel("Value of $100 Investment")
     plt.xticks(rotation=15)
