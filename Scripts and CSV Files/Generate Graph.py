@@ -27,21 +27,7 @@ def load_portfolio_totals() -> pd.DataFrame:
     out = out.drop_duplicates(subset=["Date"], keep="last").reset_index(drop=True)
     return out
 
-
-def download_sp500(start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
-    """Download S&P 500 prices and normalise to a $100 baseline (at 2025-06-27 close=6173.07)."""
-    sp500 = yf.download("^SPX", start=start_date, end=end_date + pd.Timedelta(days=1),
-                        progress=False, auto_adjust=True)
-    sp500 = sp500.reset_index()
-    if isinstance(sp500.columns, pd.MultiIndex):
-        sp500.columns = sp500.columns.get_level_values(0)
-
-    spx_27_price = 6173.07  # 2025-06-27 close (baseline)
-    scaling_factor = 100.0 / spx_27_price
-    sp500["SPX Value ($100 Invested)"] = sp500["Close"] * scaling_factor
-    return sp500[["Date", "SPX Value ($100 Invested)"]]
-
-def download_baseline(ticker: str, start_date: pd.Timestamp, end_date: pd.Timestamp) -> pd.DataFrame:
+def download_baseline(ticker: str, start_date: pd.Timestamp, end_date: pd.Timestamp, starting_capital: float = 100) -> pd.DataFrame:
     """Download prices and normalise to a $100 baseline."""
 
     baseline = yf.download(ticker, start=start_date, end=end_date + pd.Timedelta(days=1),
@@ -50,14 +36,14 @@ def download_baseline(ticker: str, start_date: pd.Timestamp, end_date: pd.Timest
     if isinstance(baseline.columns, pd.MultiIndex):
         baseline.columns = baseline.columns.get_level_values(0)
 
-    starting_price_data = yf.download(ticker, start="2025-06-27", end="2025-06-28", auto_adjust=True, progress=False)
+    starting_price_data = yf.download(ticker, start=start_date, end= start_date + pd.Timedelta(days=1), auto_adjust=True, progress=False)
     if isinstance(starting_price_data.columns, pd.MultiIndex):
         starting_price_data.columns = starting_price_data.columns.droplevel(1)
     starting_price = starting_price_data.loc[starting_price_data.index[0], "Close"]
 
-    scaling_factor = 100.0 / starting_price
-    baseline["Adjusted Value ($100 Invested)"] = baseline["Close"] * scaling_factor
-    return baseline[["Date", "Adjusted Value ($100 Invested)"]]
+    scaling_factor = starting_capital / starting_price
+    baseline["Adjusted Value"] = baseline["Close"] * scaling_factor
+    return baseline[["Date", "Adjusted Value"]]
 
 
 def find_largest_gain(df: pd.DataFrame) -> tuple[pd.Timestamp, pd.Timestamp, float]:
@@ -146,7 +132,7 @@ def main() -> dict:
     )
     plt.plot(
         sp500["Date"],
-        sp500["Adjusted Value ($100 Invested)"],
+        sp500["Adjusted Value"],
         label="S&P 500 ($100 Invested)",
         marker="o",
         color="orange",
@@ -155,7 +141,7 @@ def main() -> dict:
     )
     plt.plot(
         russell["Date"],
-        russell["Adjusted Value ($100 Invested)"],
+        russell["Adjusted Value"],
         label="Russell 2K ($100 Invested)",
         marker="o",
         color="Green",
@@ -178,8 +164,8 @@ def main() -> dict:
     # annotate final P/Ls
     final_date = chatgpt_totals["Date"].iloc[-1]
     final_chatgpt = float(chatgpt_totals["Total Equity"].iloc[-1])
-    final_spx = float(sp500["Adjusted Value ($100 Invested)"].iloc[-1])
-    final_rut = float(russell["Adjusted Value ($100 Invested)"].iloc[-1])
+    final_spx = float(sp500["Adjusted Value"].iloc[-1])
+    final_rut = float(russell["Adjusted Value"].iloc[-1])
     plt.text(final_date, final_chatgpt + 0.5, f"{final_chatgpt - 100.0:.1f}%", color="blue", fontsize=9)
     plt.text(final_date, final_spx + 0.9, f"+{final_spx - 100.0:.1f}%", color="orange", fontsize=9)
     plt.text(final_date, final_rut + 0.9, f"+{final_rut - 100.0:.1f}%", color="green", fontsize=9)
