@@ -1,4 +1,4 @@
-
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Auto Commit
 
 on:
@@ -15,10 +15,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: true   # allow pushing
-      - name: Auto Process Portfolio
+      - name: Set Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Auto Process Portfolio
         run: pip install -r requirements.txt
       - name: Pressing 'Enter' to skip
         run: python trading_script.py --data-dir 'Scripts and CSV Files' --starting-equity 100
