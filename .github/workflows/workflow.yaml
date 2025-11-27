@@ -1,0 +1,36 @@
+
+name: Auto Commit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # allow pushing
+      - name: Auto Process Portfolio
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+        run: pip install -r requirements.txt
+      - name: Pressing 'Enter' to skip
+        run: python trading_script.py --data-dir 'Scripts and CSV Files' --starting-equity 100
+      - name: Update Graph
+        run: python 'Scripts and CSV Files/Generate Graph.py'
+
+
+      - name: Commit and push
+        run: |
+          DATE=$(date +"%m/%d")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Automated update for $DATE" || echo "No changes to commit"
+          git push
