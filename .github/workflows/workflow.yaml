@@ -2,7 +2,8 @@ name: Auto Commit
 
 on:
   workflow_dispatch:
-
+  schedule:
+    - cron: "30 23 * * 1-5"   # 5:30 PM CST Mon–Fri
 permissions:
   contents: write
 
