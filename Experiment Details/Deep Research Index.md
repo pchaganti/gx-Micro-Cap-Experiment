@@ -1,3 +1,10 @@
+## Deep Research Index
+
+> **Note:** The “Starting Research” report was written *before trading began* and outlines 
+the initial hypotheses and strategy.  
+> All other reports (starting with Week 1) are written at the **end of each trading week**
+and are used to guide decisions for the **upcoming trading week**.
+
 | Week Report       | Upcoming Week (Applied To) | Written After (Week Ended)       | PDF | Summary |
 |-------------------|----------------------------|----------------------------------|------|----------|
 | Starting Research | Pre-Launch                 | —                                | [PDF](https://github.com/LuckyOne7777/ChatGPT-Micro-Cap-Experiment/blob/main/Weekly%20Deep%20Research%20(PDF)/Starting%20Research.pdf) | [MD](https://github.com/LuckyOne7777/ChatGPT-Micro-Cap-Experiment/blob/main/Weekly%20Deep%20Research%20(MD)/Starting%20Research%20Summary.md) |
