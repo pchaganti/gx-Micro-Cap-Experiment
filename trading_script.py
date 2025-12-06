@@ -1376,7 +1376,7 @@ def main(data_dir: Path | None = None, starting_equity_override: Optional[Union[
         set_data_dir(data_dir)
     
     chatgpt_portfolio, cash = load_latest_portfolio_state(starting_equity_override=starting_equity_override)
-    chatgpt_portfolio, cash = process_portfolio(chatgpt_portfolio, cash)
+    chatgpt_portfolio, cash = process_portfolio(chatgpt_portfolio, cash, interactive= not args.skip)
     daily_results(chatgpt_portfolio, cash)
 
 if __name__ == "__main__":
@@ -1385,6 +1385,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", default=None, help="Required data directory")
     parser.add_argument("--asof", default=None, help="Treat this YYYY-MM-DD as 'today'")
+    parser.add_argument("--skip", action="store_true", help="Boolean to skip portfolio decsions.")
     parser.add_argument(
         "--log-level",
         default=None,   # default = None means no logging unless specified
