@@ -45,8 +45,8 @@ jobs:
               print("Market open — continuing workflow.")
           EOF
 
-      - name: Process portfolio | Pressing 'Enter' to skip
-        run: python trading_script.py --data-dir "Scripts and CSV Files" --starting-equity 100
+      - name: Process portfolio
+        run: python trading_script.py --data-dir "Scripts and CSV Files" --starting-equity 100 --skip
 
       - name: Update Graph
         run: python "Scripts and CSV Files/Generate Graph.py"
