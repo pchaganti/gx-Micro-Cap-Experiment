@@ -114,6 +114,9 @@ def main() -> dict:
     sp500 = download_baseline("^SPX", start_date, end_date)
     russell = download_baseline("^RUT", start_date, end_date)
 
+    sp500.to_csv("Frontend/Baseline CSVs/sp500.csv", index=False)
+    russell.to_csv("Frontend/Baseline CSVs/russell.csv", index=False)
+    
     # metrics
     largest_start, largest_end, largest_gain = find_largest_gain(chatgpt_totals)
     dd_date, dd_value, dd_pct = compute_drawdown(chatgpt_totals)

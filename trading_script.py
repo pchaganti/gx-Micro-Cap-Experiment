@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, cast,Dict, List, Optional
+from typing import Any, cast,Dict, List, Optional, Union
 import os
 import warnings
 
@@ -1370,13 +1370,13 @@ def load_latest_portfolio_state(
     return latest_tickers, cash
 
 
-def main(data_dir: Path | None = None, starting_equity_override: Optional[Union[str, float, Decimal]] = None) -> None:
+def main(data_dir: Path | None = None, starting_equity_override: Optional[Union[str, float, Decimal]] = None, skip: bool = False) -> None:
     """Check versions, then run the trading script."""
     if data_dir is not None:
         set_data_dir(data_dir)
     
     chatgpt_portfolio, cash = load_latest_portfolio_state(starting_equity_override=starting_equity_override)
-    chatgpt_portfolio, cash = process_portfolio(chatgpt_portfolio, cash, interactive= not args.skip)
+    chatgpt_portfolio, cash = process_portfolio(chatgpt_portfolio, cash, interactive= not skip)
     daily_results(chatgpt_portfolio, cash)
 
 if __name__ == "__main__":
@@ -1410,4 +1410,4 @@ if __name__ == "__main__":
     if args.asof:
         set_asof(args.asof)
 
-    main(Path(args.data_dir) if args.data_dir else None, starting_equity_override=args.starting_equity)
+    main(Path(args.data_dir) if args.data_dir else None, starting_equity_override=args.starting_equity, skip=args.skip)
